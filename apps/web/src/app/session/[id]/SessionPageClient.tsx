@@ -1,9 +1,12 @@
 "use client";
 
+import { useCallback } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { SessionTimer } from "@/components/session/SessionTimer";
 import { SessionLayout } from "@/components/session/SessionLayout";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { SessionWebSocketProvider } from "@/contexts/SessionWebSocketContext";
 
 type Problem = {
   id: string;
@@ -30,6 +33,12 @@ export function SessionPageClient({
   diagramDocument: unknown;
   notesDocument: string;
 }) {
+  const { getToken } = useAuth();
+  const getFreshToken = useCallback(
+    () => getToken({ skipCache: true }),
+    [getToken]
+  );
+
   const handleSaveDiagram = async (snapshot: unknown) => {
     await fetch(`/api/sessions/${sessionId}`, {
       method: "PATCH",
@@ -70,14 +79,16 @@ export function SessionPageClient({
         </div>
       </header>
 
-      <SessionLayout
-        sessionId={sessionId}
-        problem={problem}
-        diagramDocument={diagramDocument}
-        notesDocument={notesDocument}
-        onSaveDiagram={handleSaveDiagram}
-        onSaveNotes={handleSaveNotes}
-      />
+      <SessionWebSocketProvider sessionId={sessionId} getToken={getFreshToken}>
+        <SessionLayout
+          sessionId={sessionId}
+          problem={problem}
+          diagramDocument={diagramDocument}
+          notesDocument={notesDocument}
+          onSaveDiagram={handleSaveDiagram}
+          onSaveNotes={handleSaveNotes}
+        />
+      </SessionWebSocketProvider>
     </div>
   );
 }

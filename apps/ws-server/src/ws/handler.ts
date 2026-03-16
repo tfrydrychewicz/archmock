@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "../lib/db";
 import { sessions, users } from "@archmock/db";
 import { handleChatSend } from "../services/chatHandler";
-import type { ClientMessage } from "@archmock/shared";
+import { handleDiagramUpdate } from "../services/diagramUpdateHandler";
+import type { ClientMessage, DiagramGraph } from "@archmock/shared";
 
 type SendFn = (msg: object) => void;
 
@@ -14,6 +15,7 @@ export function createWSHandlers(
   let boundSessionId: string | null = null;
   let sendFn: SendFn | null = null;
   let authPromise: Promise<void> | null = null;
+  let previousGraph: DiagramGraph | null = null;
 
   const sendError = (code: string, message: string) => {
     sendFn?.({ type: "error", code, message });
@@ -89,7 +91,16 @@ export function createWSHandlers(
             await handleChatSend(sid, msg.content, sendToClient);
             break;
           case "diagram.update":
-            // Sprint 4 - persist diagram
+            handleDiagramUpdate(
+              sid,
+              msg.graph,
+              previousGraph,
+              sendToClient
+            ).then((g) => {
+              previousGraph = g;
+            }).catch((err) => {
+              console.error("Diagram update error:", err);
+            });
             break;
           case "session.end":
             // TODO: end session
@@ -107,6 +118,7 @@ export function createWSHandlers(
 
     onClose() {
       boundSessionId = null;
+      previousGraph = null;
     },
   };
 }

@@ -13,6 +13,8 @@ import "../whiteboard/shape-types";
 import "tldraw/tldraw.css";
 import { ShapePalette } from "../whiteboard/ShapePalette";
 import { ShapePropertiesPanel } from "../whiteboard/ShapePropertiesPanel";
+import { DiagramChangeNotifier } from "../whiteboard/DiagramChangeNotifier";
+import type { DiagramGraph } from "@archmock/shared";
 import {
   SDServiceShapeUtil,
   SDDatabaseShapeUtil,
@@ -49,10 +51,12 @@ export function SessionWhiteboard({
   sessionId,
   initialSnapshot,
   onSave,
+  onDiagramChange,
 }: {
   sessionId: string;
   initialSnapshot: unknown;
   onSave: (snapshot: unknown) => Promise<void>;
+  onDiagramChange?: (graph: DiagramGraph) => void;
 }) {
   const store = useMemo(
     () =>
@@ -112,6 +116,7 @@ export function SessionWhiteboard({
   return (
     <div className="h-full w-full relative">
       <Tldraw store={store} shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}>
+        {onDiagramChange && <DiagramChangeNotifier onDiagramChange={onDiagramChange} />}
         <div className="absolute left-4 top-20 z-[300]">
           <ShapePalette />
         </div>

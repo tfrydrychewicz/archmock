@@ -76,7 +76,8 @@ export async function handleChatSend(
   const elapsedMinutes = Math.floor(elapsedMs / 60_000);
   const phase = detectPhaseFromTime(elapsedMinutes, timeLimit);
 
-  const diagram = (session.diagramDocument as DiagramGraph) ?? EMPTY_DIAGRAM;
+  const diagram =
+    (session.diagramGraph as DiagramGraph | null) ?? EMPTY_DIAGRAM;
 
   const history = await db
     .select({ role: messages.role, content: messages.content })

@@ -5,6 +5,7 @@ import { Group, Panel, Separator } from "react-resizable-panels";
 import { SessionWhiteboard } from "./SessionWhiteboard";
 import { TextPane } from "./TextPane";
 import { ChatPanel } from "@/components/chat/ChatPanel";
+import { useSessionWebSocketContext } from "@/contexts/SessionWebSocketContext";
 
 type Problem = {
   id: string;
@@ -60,6 +61,14 @@ export function SessionLayout({
     [debouncedSave]
   );
 
+  const { send } = useSessionWebSocketContext();
+  const handleDiagramChange = useCallback(
+    (graph: import("@archmock/shared").DiagramGraph) => {
+      send({ type: "diagram.update", graph });
+    },
+    [send]
+  );
+
   return (
     <Group
       id="session-layout"
@@ -93,6 +102,7 @@ export function SessionLayout({
           sessionId={sessionId}
           initialSnapshot={diagramDocument}
           onSave={onSaveDiagram}
+          onDiagramChange={handleDiagramChange}
         />
       </Panel>
       <Separator

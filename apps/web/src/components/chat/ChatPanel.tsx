@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatMessageContent } from "./ChatMessageContent";
-import { useAuth } from "@clerk/nextjs";
-import { useSessionWebSocket, type WSStatus } from "@/hooks/useSessionWebSocket";
+import { useSessionWebSocketContext } from "@/contexts/SessionWebSocketContext";
+import type { WSStatus } from "@/hooks/useSessionWebSocket";
 import type { ServerMessage } from "@archmock/shared";
 
 export type ChatMessage = {
@@ -20,7 +20,6 @@ export function ChatPanel({
   sessionId: string;
   problemStatement?: string;
 }) {
-  const { getToken } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streamingContent, setStreamingContent] = useState("");
@@ -47,6 +46,12 @@ export function ChatPanel({
           setStreamingContent("");
         }
         break;
+      case "observation.interjection":
+        setMessages((prev) => [
+          ...prev,
+          { id: msg.messageId, role: "assistant", content: msg.content },
+        ]);
+        break;
       case "error":
         streamingIdRef.current = null;
         setStreamingContent("");
@@ -56,16 +61,11 @@ export function ChatPanel({
     }
   }, []);
 
-  const getFreshToken = useCallback(
-    () => getToken({ skipCache: true }),
-    [getToken]
-  );
+  const { status, send, registerHandler } = useSessionWebSocketContext();
 
-  const { status, send } = useSessionWebSocket(
-    sessionId,
-    getFreshToken,
-    handleServerMessage
-  );
+  useEffect(() => {
+    return registerHandler(handleServerMessage);
+  }, [registerHandler, handleServerMessage]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

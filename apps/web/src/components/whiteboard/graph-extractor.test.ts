@@ -18,7 +18,7 @@ function createMockEditor(shapes: Array<{
           props: { terminal: b.terminal },
           toId: b.toId,
         })),
-  } as Parameters<typeof extractDiagramGraph>[0];
+  } as unknown as Parameters<typeof extractDiagramGraph>[0];
 }
 
 describe("extractDiagramGraph", () => {

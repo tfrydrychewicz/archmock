@@ -82,6 +82,7 @@ export const sessions = pgTable(
     startedAt: timestamp("started_at", { withTimezone: true }).defaultNow(),
     endedAt: timestamp("ended_at", { withTimezone: true }),
     durationSec: integer("duration_sec"),
+    diagramDocument: jsonb("diagram_document"),
   },
   (table) => [
     index("sessions_user_idx").on(table.userId),

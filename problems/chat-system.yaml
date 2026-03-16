@@ -1,0 +1,64 @@
+id: chat-system
+title: "Design a Real-Time Chat System"
+difficulty: mid
+category: [messaging, real-time, distributed-systems]
+companies: [meta, slack, discord, whatsapp]
+timeLimit: 45
+
+statement: |
+  Design a real-time chat system like Slack or WhatsApp.
+  The system should:
+  - Support 1:1 and group chats
+  - Deliver messages in real-time with low latency
+  - Support online/offline status
+  - Persist message history
+  - Handle millions of concurrent users
+
+clarifications:
+  - question: "What's the scale we're targeting?"
+    answer: "Assume 10M DAU, 100M messages per day. Peak: 50K concurrent connections."
+    keywords: [scale, traffic, users, volume, concurrent]
+  - question: "Do we need to support media (images, files)?"
+    answer: "For MVP, text only. Media can be a follow-up."
+    keywords: [media, images, files, attachments]
+  - question: "How long should we retain message history?"
+    answer: "Indefinitely for now. Assume we have storage budget."
+    keywords: [retention, history, delete, storage]
+  - question: "Do we need end-to-end encryption?"
+    answer: "Not for MVP. Assume TLS in transit, encryption at rest."
+    keywords: [encryption, e2e, security, privacy]
+  - question: "What about message ordering and delivery guarantees?"
+    answer: "At-least-once delivery. Ordering per conversation. Think about how to achieve this."
+    keywords: [ordering, delivery, exactly-once, guarantees]
+
+evaluationGuide:
+  expectedComponents:
+    - "WebSocket or long-polling for real-time delivery"
+    - "Message service / API"
+    - "Database for message persistence (consider write pattern)"
+    - "Presence service for online status"
+    - "Load balancer for connection distribution"
+    - "Message queue for fan-out (group chats)"
+  scalingConcerns:
+    - "WebSocket connection scaling — sticky sessions, connection limits"
+    - "Message fan-out for group chats — N writes for N participants"
+    - "Presence at scale — heartbeat, last-seen"
+    - "Read-heavy vs write-heavy — different access patterns"
+  commonMistakes:
+    - "Polling for messages instead of push (WebSocket/SSE)"
+    - "No message queue for group chat fan-out"
+    - "Single database for both messages and presence"
+    - "Ignoring connection limits per server"
+  deepDiveTopics:
+    - "WebSocket vs long-polling vs SSE trade-offs"
+    - "Message ordering: sequence numbers, vector clocks"
+    - "Presence: heartbeat interval, last-seen vs real-time"
+    - "Database: SQL vs NoSQL for chat messages"
+  followUpConstraints:
+    - "Now add typing indicators. How does the design change?"
+    - "A group has 100K members. How do you handle a new message?"
+  exampleGoodQuestions:
+    - "What's our target message latency?"
+    - "Do we need read receipts?"
+    - "How do we handle message editing/deletion?"
+    - "What's the typical group size distribution?"

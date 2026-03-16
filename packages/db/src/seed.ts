@@ -6,7 +6,8 @@ import { load } from "js-yaml";
 import { problems } from "./schema";
 import type { SDProblem } from "@archmock/shared";
 
-const PROBLEMS_DIR = join(process.cwd(), "problems");
+// problems/ is at monorepo root; seed runs from packages/db
+const PROBLEMS_DIR = join(process.cwd(), "..", "..", "problems");
 
 async function loadProblems(): Promise<SDProblem[]> {
   try {

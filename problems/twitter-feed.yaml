@@ -1,0 +1,64 @@
+id: twitter-feed
+title: "Design a Twitter/Social Media Feed"
+difficulty: mid
+category: [feed, social, distributed-systems]
+companies: [twitter, meta, linkedin]
+timeLimit: 45
+
+statement: |
+  Design a social media feed like Twitter's home timeline.
+  The system should:
+  - Display a personalized feed of tweets from people the user follows
+  - Support real-time updates (new tweets appear in feed)
+  - Handle high read volume (users refresh frequently)
+  - Support follow/unfollow operations
+  - Order tweets by recency (or relevance)
+
+clarifications:
+  - question: "What's the scale?"
+    answer: "100M users, 500M tweets/day. Average user follows 200 people. Feed reads: 10x writes."
+    keywords: [scale, users, tweets, volume, traffic]
+  - question: "How many tweets should the feed show?"
+    answer: "Infinite scroll. Assume we need to serve the first ~100 tweets quickly."
+    keywords: [limit, pagination, how many, feed size]
+  - question: "Real-time or eventual consistency for new tweets?"
+    answer: "Design for both. Pre-computed feed is acceptable with some delay."
+    keywords: [realtime, consistency, delay, fresh]
+  - question: "Do we need to support trending topics or search?"
+    answer: "Not for MVP. Focus on the feed generation pipeline."
+    keywords: [trending, search, discovery]
+  - question: "What about media (images, videos) in tweets?"
+    answer: "Assume tweets are text-only for MVP. Media URLs can be embedded."
+    keywords: [media, images, video]
+
+evaluationGuide:
+  expectedComponents:
+    - "Tweet service / API"
+    - "Feed generation service (fan-out on read vs write)"
+    - "Database for tweets and user data"
+    - "Cache layer for hot feeds (Redis/Memcached)"
+    - "Graph service for follow relationships"
+    - "Message queue for async feed updates"
+  scalingConcerns:
+    - "Fan-out: read vs write — trade-offs for feed generation"
+    - "Cache invalidation when new tweet arrives"
+    - "Celebrity problem — users with millions of followers"
+    - "Feed merge: combining multiple timelines"
+  commonMistakes:
+    - "Fan-out on read for everyone (doesn't scale for celebrities)"
+    - "No caching for hot feeds"
+    - "Synchronous feed generation on every request"
+    - "Ignoring the celebrity / influencer problem"
+  deepDiveTopics:
+    - "Fan-out on read vs fan-out on write (push vs pull)"
+    - "Hybrid: push for normal users, pull for celebrities"
+    - "Cache strategy: per-user feed cache, TTL, invalidation"
+    - "Database: how to store and query follow graph"
+  followUpConstraints:
+    - "A celebrity with 50M followers posts a tweet. How does your system handle it?"
+    - "We want to add 'While you were away' — tweets from last 24h you missed. How?"
+  exampleGoodQuestions:
+    - "What's our target feed load latency?"
+    - "How do we rank tweets — chronological or algorithmic?"
+    - "What's the follow graph size distribution?"
+    - "Do we need to support unfollow and feed updates?"

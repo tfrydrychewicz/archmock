@@ -1,11 +1,13 @@
 "use client";
 
 import type { Editor } from "tldraw";
+import { renderPlaintextFromRichText } from "tldraw";
 import type {
   DiagramGraph,
   DiagramEdge,
   DiagramNode,
   DiagramZone,
+  DiagramTextBlock,
   SDProtocol,
 } from "@archmock/shared";
 
@@ -82,6 +84,27 @@ export function extractDiagramGraph(editor: Editor): DiagramGraph {
       };
     });
 
+  const textBlocks: DiagramTextBlock[] = allShapes
+    .filter(
+      (s) =>
+        typeof s.type === "string" &&
+        (s.type === "text" || s.type === "note")
+    )
+    .map((s) => {
+      const props = s.props as Record<string, unknown>;
+      const richText = props?.richText;
+      const content =
+        richText && typeof richText === "object"
+          ? renderPlaintextFromRichText(editor, richText as Parameters<typeof renderPlaintextFromRichText>[1])
+          : "";
+      return {
+        id: s.id,
+        type: s.type as "text" | "note",
+        content: content.trim(),
+        position: { x: s.x, y: s.y },
+      };
+    });
+
   const arrowShapes = allShapes.filter((s) => s.type === "arrow");
   const edges: DiagramEdge[] = [];
 
@@ -131,5 +154,5 @@ export function extractDiagramGraph(editor: Editor): DiagramGraph {
     hasLoadBalancing: nodes.some((n) => n.type === "sd-load-balancer"),
   };
 
-  return { nodes, edges, zones, metadata };
+  return { nodes, edges, zones, textBlocks, metadata };
 }

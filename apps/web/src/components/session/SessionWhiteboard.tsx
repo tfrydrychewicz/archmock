@@ -111,7 +111,7 @@ export function SessionWhiteboard({
 
   return (
     <div className="h-full w-full relative">
-      <Tldraw store={store} shapeUtils={SHAPE_UTILS}>
+      <Tldraw store={store} shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}>
         <div className="absolute left-4 top-20 z-[300]">
           <ShapePalette />
         </div>

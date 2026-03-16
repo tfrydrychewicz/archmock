@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Tldraw } from "tldraw";
+import { Tldraw, defaultShapeUtils } from "tldraw";
 import "./shape-types";
 import "tldraw/tldraw.css";
 import { extractDiagramGraph } from "./graph-extractor";
@@ -38,7 +38,7 @@ export function Whiteboard() {
     <div className="fixed inset-0 flex">
       <div className="flex-1 relative">
         <Tldraw
-          shapeUtils={SHAPE_UTILS}
+          shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}
           onMount={(editor) => {
             const interval = setInterval(() => {
               const graph = extractDiagramGraph(editor);

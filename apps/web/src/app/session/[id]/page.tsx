@@ -54,6 +54,7 @@ export default async function SessionPage({
       currentPhase={(session.currentPhase ?? "clarification") as "clarification" | "high_level" | "deep_dive" | "wrap_up"}
       startedAt={session.startedAt?.toISOString() ?? new Date().toISOString()}
       diagramDocument={session.diagramDocument ?? undefined}
+      notesDocument={session.notesDocument ?? ""}
     />
   );
 }

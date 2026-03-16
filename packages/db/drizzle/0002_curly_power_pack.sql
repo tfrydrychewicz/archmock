@@ -1,0 +1,1 @@
+ALTER TABLE "sessions" ADD COLUMN "notes_document" text;

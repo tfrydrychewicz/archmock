@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { SessionWhiteboard } from "@/components/session/SessionWhiteboard";
 import { SessionTimer } from "@/components/session/SessionTimer";
-import { ChatPanel } from "@/components/chat/ChatPanel";
+import { SessionLayout } from "@/components/session/SessionLayout";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 type Problem = {
   id: string;
@@ -20,6 +20,7 @@ export function SessionPageClient({
   currentPhase,
   startedAt,
   diagramDocument,
+  notesDocument,
 }: {
   sessionId: string;
   problem?: Problem;
@@ -27,12 +28,21 @@ export function SessionPageClient({
   currentPhase: string;
   startedAt: string;
   diagramDocument: unknown;
+  notesDocument: string;
 }) {
   const handleSaveDiagram = async (snapshot: unknown) => {
     await fetch(`/api/sessions/${sessionId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ diagramDocument: snapshot }),
+    });
+  };
+
+  const handleSaveNotes = async (notes: string) => {
+    await fetch(`/api/sessions/${sessionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notesDocument: notes }),
     });
   };
 
@@ -50,28 +60,24 @@ export function SessionPageClient({
             {problem?.title ?? "Session"}
           </h1>
         </div>
-        <SessionTimer
-          timeLimitMinutes={problem?.timeLimit ?? 45}
-          startedAt={startedAt}
-          currentPhase={currentPhase as "clarification" | "high_level" | "deep_dive" | "wrap_up"}
-        />
+        <div className="flex items-center gap-4">
+          <SessionTimer
+            timeLimitMinutes={problem?.timeLimit ?? 45}
+            startedAt={startedAt}
+            currentPhase={currentPhase as "clarification" | "high_level" | "deep_dive" | "wrap_up"}
+          />
+          <ThemeToggle />
+        </div>
       </header>
 
-      <div className="flex flex-1 min-h-0">
-        <div className="w-[70%] border-r">
-          <SessionWhiteboard
-            sessionId={sessionId}
-            initialSnapshot={diagramDocument}
-            onSave={handleSaveDiagram}
-          />
-        </div>
-        <div className="w-[30%] flex flex-col bg-muted/20 min-h-0">
-          <ChatPanel
-            sessionId={sessionId}
-            problemStatement={problem?.statement}
-          />
-        </div>
-      </div>
+      <SessionLayout
+        sessionId={sessionId}
+        problem={problem}
+        diagramDocument={diagramDocument}
+        notesDocument={notesDocument}
+        onSaveDiagram={handleSaveDiagram}
+        onSaveNotes={handleSaveNotes}
+      />
     </div>
   );
 }

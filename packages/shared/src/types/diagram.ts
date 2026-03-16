@@ -50,10 +50,18 @@ export interface DiagramZone {
   childNodeIds: string[];
 }
 
+export interface DiagramTextBlock {
+  id: string;
+  type: "text" | "note";
+  content: string;
+  position: { x: number; y: number };
+}
+
 export interface DiagramGraph {
   nodes: DiagramNode[];
   edges: DiagramEdge[];
   zones: DiagramZone[];
+  textBlocks?: DiagramTextBlock[];
   metadata?: {
     nodeCount: number;
     edgeCount: number;

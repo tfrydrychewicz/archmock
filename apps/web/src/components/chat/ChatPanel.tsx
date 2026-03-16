@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { ChatMessageContent } from "./ChatMessageContent";
 import { useAuth } from "@clerk/nextjs";
 import { useSessionWebSocket, type WSStatus } from "@/hooks/useSessionWebSocket";
 import type { ServerMessage } from "@archmock/shared";
@@ -131,9 +131,7 @@ export function ChatPanel({
             }`}
           >
             {m.role === "assistant" ? (
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>{m.content}</ReactMarkdown>
-              </div>
+              <ChatMessageContent content={m.content} />
             ) : (
               <p className="whitespace-pre-wrap">{m.content}</p>
             )}
@@ -142,9 +140,7 @@ export function ChatPanel({
 
         {streamingContent && (
           <div className="mr-8 rounded-lg bg-muted p-3 text-sm">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{streamingContent}</ReactMarkdown>
-            </div>
+            <ChatMessageContent content={streamingContent} />
           </div>
         )}
 

@@ -1,9 +1,78 @@
 @import "tailwindcss";
 
-@theme {
+/* Use class-based dark mode for manual light/dark/auto control */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light mode (default) */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+}
+
+/* Dark mode - neutral gray palette */
+.dark {
+  --background: 0 0% 7%;
+  --foreground: 0 0% 96%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 96%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 70%;
+  --border: 0 0% 16%;
+  --input: 0 0% 12%;
+  --ring: 217 91% 60%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
   --color-primary: #2563eb;
   --color-primary-foreground: #ffffff;
-  --color-muted-foreground: #64748b;
-  --color-accent: #f1f5f9;
-  --color-input: #e2e8f0;
+  --color-accent: hsl(var(--muted));
+}
+
+/* Restore list styles - Tailwind preflight resets these */
+.notes-editor ul,
+.chat-content ul {
+  list-style-type: disc;
+  padding-inline-start: 1.5em;
+}
+.notes-editor ol,
+.chat-content ol {
+  list-style-type: decimal;
+  padding-inline-start: 1.5em;
+}
+.notes-editor li,
+.chat-content li {
+  display: list-item;
+}
+
+/* Ensure readable text in dark mode */
+.dark {
+  color: hsl(var(--foreground));
+}
+.dark .chat-content,
+.dark .notes-editor {
+  color: hsl(var(--foreground));
+}
+.dark .chat-content p,
+.dark .chat-content li,
+.dark .chat-content td,
+.dark .chat-content th,
+.dark .notes-editor p,
+.dark .notes-editor li {
+  color: inherit;
 }

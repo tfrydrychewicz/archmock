@@ -1,5 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { extractDiagramGraph } from "./graph-extractor";
+
+vi.mock("tldraw", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("tldraw")>();
+  return {
+    ...mod,
+    renderPlaintextFromRichText: (_editor: unknown, _richText: unknown) =>
+      "• User auth\n• Real-time updates",
+  };
+});
 
 function createMockEditor(shapes: Array<{
   id: string;
@@ -68,6 +77,33 @@ describe("extractDiagramGraph", () => {
       subLabel: "SQL",
     });
     expect(graph.metadata?.nodeCount).toBe(2);
+  });
+
+  it("extracts textBlocks from tldraw text and note shapes", () => {
+    const shapes = [
+      {
+        id: "shape:note1",
+        type: "note",
+        x: 50,
+        y: 50,
+        parentId: "page:main",
+        props: {
+          richText: {
+            type: "doc",
+            content: [{ type: "paragraph", content: [] }],
+          },
+        },
+      },
+    ];
+    const editor = createMockEditor(shapes, []);
+    const graph = extractDiagramGraph(editor);
+    expect(graph.textBlocks).toHaveLength(1);
+    expect(graph.textBlocks?.[0]).toMatchObject({
+      id: "shape:note1",
+      type: "note",
+      content: "• User auth\n• Real-time updates",
+      position: { x: 50, y: 50 },
+    });
   });
 
   it("excludes sd-zone from nodes", () => {

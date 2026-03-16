@@ -50,6 +50,7 @@ export async function GET(
       currentPhase: session.currentPhase,
       startedAt: session.startedAt,
       diagramDocument: session.diagramDocument,
+      notesDocument: session.notesDocument ?? "",
     });
   } catch (err) {
     console.error("Session fetch failed:", err);
@@ -77,13 +78,15 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { diagramDocument, currentPhase } = body as {
+    const { diagramDocument, notesDocument, currentPhase } = body as {
       diagramDocument?: unknown;
+      notesDocument?: string;
       currentPhase?: string;
     };
 
     const updateData: Record<string, unknown> = {};
     if (diagramDocument !== undefined) updateData.diagramDocument = diagramDocument;
+    if (notesDocument !== undefined) updateData.notesDocument = notesDocument;
     if (currentPhase !== undefined) updateData.currentPhase = currentPhase;
 
     if (Object.keys(updateData).length === 0) {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme/ThemeScript";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "ArchMock — System Design Interview Practice",
@@ -14,8 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">{children}</body>
+      <html lang="en" suppressHydrationWarning>
+        <body className="antialiased text-foreground bg-background">
+          <ThemeScript />
+          <ThemeProvider>{children}</ThemeProvider>
+        </body>
       </html>
     </ClerkProvider>
   );

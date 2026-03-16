@@ -214,8 +214,8 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 # === AI ===
 ANTHROPIC_API_KEY=sk-ant-...
 # Model overrides (defaults shown)
-AI_MODEL_REALTIME=claude-sonnet-4-20250514
-AI_MODEL_EVALUATION=claude-opus-4-20250514
+AI_MODEL_REALTIME=claude-sonnet-4-6
+AI_MODEL_EVALUATION=claude-opus-4-6
 
 # === WebSocket Server ===
 WS_SERVER_URL=ws://localhost:4000
@@ -685,7 +685,7 @@ Respond in JSON:
 }`
 
     const response = await this.ai.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }],
     })

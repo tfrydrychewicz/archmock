@@ -11,11 +11,18 @@
     "lint": "echo 'Lint skipped (no config)'"
   },
   "dependencies": {
-    "@archmock/shared": "workspace:*",
+    "dotenv": "^16.4.0",
+    "openai": "^4.77.0",
+    "@anthropic-ai/sdk": "^0.39.0",
     "@archmock/db": "workspace:*",
+    "@archmock/shared": "workspace:*",
+    "@clerk/backend": "^1.21.0",
     "@hono/node-server": "^1.13.0",
     "@hono/node-ws": "^1.1.0",
-    "hono": "^4.7.0"
+    "drizzle-orm": "^0.38.0",
+    "hono": "^4.7.0",
+    "postgres": "^3.4.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

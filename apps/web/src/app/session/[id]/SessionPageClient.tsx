@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { SessionWhiteboard } from "@/components/session/SessionWhiteboard";
 import { SessionTimer } from "@/components/session/SessionTimer";
+import { ChatPanel } from "@/components/chat/ChatPanel";
 
 type Problem = {
   id: string;
@@ -64,23 +65,11 @@ export function SessionPageClient({
             onSave={handleSaveDiagram}
           />
         </div>
-        <div className="w-[30%] flex flex-col bg-muted/20">
-          <div className="border-b px-4 py-2">
-            <h2 className="text-sm font-medium">Chat</h2>
-          </div>
-          <div className="flex-1 overflow-auto p-4">
-            {problem?.statement && (
-              <div className="mb-4 rounded-lg border bg-card p-4 text-sm">
-                <h3 className="font-medium mb-2">Problem Statement</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {problem.statement}
-                </p>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground">
-              Chat with AI interviewer coming in Sprint 3.
-            </p>
-          </div>
+        <div className="w-[30%] flex flex-col bg-muted/20 min-h-0">
+          <ChatPanel
+            sessionId={sessionId}
+            problemStatement={problem?.statement}
+          />
         </div>
       </div>
     </div>

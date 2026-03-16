@@ -1,9 +1,11 @@
+import "./env";
 import { serve } from "@hono/node-server";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { healthRoutes } from "./routes/health";
+import { createWSHandlers } from "./ws/handler";
 
 const app = new Hono();
 
@@ -19,17 +21,16 @@ const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 app.get(
   "/ws",
-  upgradeWebSocket((c) => ({
-    onOpen: () => {
-      console.log("WebSocket connection opened");
-    },
-    onMessage: (evt, ws) => {
-      ws.send(JSON.stringify({ type: "pong" }));
-    },
-    onClose: () => {
-      console.log("WebSocket connection closed");
-    },
-  }))
+  upgradeWebSocket((c) => {
+    const token = c.req.query("token") ?? null;
+    const sessionId = c.req.query("sessionId") ?? null;
+    const handlers = createWSHandlers(token, sessionId);
+    return {
+      onOpen: handlers.onOpen,
+      onMessage: handlers.onMessage,
+      onClose: handlers.onClose,
+    };
+  })
 );
 
 const port = Number(process.env.PORT) || 4000;

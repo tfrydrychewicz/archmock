@@ -180,3 +180,71 @@ Respond ONLY with valid JSON, no other text:
 
   return null;
 }
+
+export type VoiceResponse = {
+  speech: string;
+  chatSummary: string;
+};
+
+export async function getVoiceInterviewerResponse(
+  systemPrompt: string,
+  messages: { role: "user" | "assistant"; content: string }[]
+): Promise<VoiceResponse> {
+  const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+  const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+
+  const apiMessages = messages.map((m) => ({
+    role: m.role as "user" | "assistant",
+    content: m.content,
+  }));
+
+  if (hasAnthropicKey) {
+    try {
+      const anthropic = new Anthropic();
+      const model = process.env.AI_MODEL_REALTIME ?? "claude-sonnet-4-6";
+      const response = await anthropic.messages.create({
+        model,
+        max_tokens: 512,
+        system: systemPrompt,
+        messages: apiMessages,
+      });
+      const text =
+        response.content[0].type === "text"
+          ? (response.content[0] as { text: string }).text
+          : "";
+      const parsed = JSON.parse(text.trim()) as VoiceResponse;
+      return {
+        speech: parsed.speech ?? "",
+        chatSummary: parsed.chatSummary ?? "",
+      };
+    } catch (err) {
+      console.warn("Claude voice response failed:", err);
+    }
+  }
+
+  if (hasOpenAIKey) {
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+      const completion = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...apiMessages,
+        ],
+        max_completion_tokens: 512,
+      });
+      const text = completion.choices[0]?.message?.content?.trim() ?? "";
+      if (!text) throw new Error("Empty response");
+      const parsed = JSON.parse(text) as VoiceResponse;
+      return {
+        speech: parsed.speech ?? "",
+        chatSummary: parsed.chatSummary ?? "",
+      };
+    } catch (err) {
+      console.warn("OpenAI voice response failed:", err);
+    }
+  }
+
+  throw new Error("No AI provider available");
+}

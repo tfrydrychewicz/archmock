@@ -83,6 +83,7 @@ export function SessionPageClient({
         <SessionLayout
           sessionId={sessionId}
           problem={problem}
+          currentPhase={currentPhase}
           diagramDocument={diagramDocument}
           notesDocument={notesDocument}
           onSaveDiagram={handleSaveDiagram}

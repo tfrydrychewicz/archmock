@@ -18,10 +18,10 @@
 - Ewaluacja końcowa sesji (Claude Opus)
 - Historia sesji z wynikami
 - Eksport sesji do PDF
+- Voice agent (Sprint 4b) — STT + TTS via ElevenLabs
 
 ### Co NIE WCHODZI do MVP
 
-- Voice agent (Phase 2)
 - Vision-based diagram analysis / PNG snapshots (Phase 2)
 - Billing / Stripe (Phase 2)
 - Multiplayer (Phase 3+)
@@ -38,6 +38,7 @@
 | Redis | Docker container, port 6379 | Upstash | Connection string w `.env` |
 | File storage | Lokalny folder `./storage/` | Cloudflare R2 / S3 | Adapter pattern — StorageService interface |
 | AI | Claude API (cloud) | Claude API (cloud) | Bez zmian |
+| Voice | ElevenLabs (cloud) | ElevenLabs (cloud) | ELEVENLABS_API_KEY — STT + TTS |
 | Auth | Clerk dev mode | Clerk production | Zmiana kluczy w `.env` |
 
 **Zasada**: Każda zależność na infrastrukturę jest za abstrakcją. Kod aplikacji nie wie czy rozmawia z lokalnym Dockerem czy z produkcyjnym Neon.
@@ -92,6 +93,9 @@ archmock/
 │       │   │   │   ├── graph.ts        # DiagramGraph types + parsing
 │       │   │   │   ├── analyzer.ts     # Static analysis rules
 │       │   │   │   └── differ.ts       # Change detection
+│       │   │   ├── voice/          # Voice agent (Sprint 4b)
+│       │   │   │   ├── elevenlabs.ts    # STT + TTS client
+│       │   │   │   └── voiceHandler.ts  # Audio → STT → AI → TTS flow
 │       │   │   └── session/        # Session state machine
 │       │   │       ├── manager.ts      # Session lifecycle
 │       │   │       └── phases.ts       # Phase transitions
@@ -217,6 +221,9 @@ ANTHROPIC_API_KEY=sk-ant-...
 AI_MODEL_REALTIME=claude-sonnet-4-6
 AI_MODEL_EVALUATION=claude-opus-4-6
 
+# === Voice (Sprint 4b) ===
+ELEVENLABS_API_KEY=...
+
 # === WebSocket Server ===
 WS_SERVER_URL=ws://localhost:4000
 NEXT_PUBLIC_WS_URL=ws://localhost:4000
@@ -267,6 +274,7 @@ if [ ! -f .env.local ]; then
   echo "   cp .env.example .env.local"
   echo ""
   echo "   Required: ANTHROPIC_API_KEY, Clerk keys"
+  echo "   Optional (voice): ELEVENLABS_API_KEY"
   exit 1
 fi
 
@@ -1148,6 +1156,26 @@ export function extractDiagramGraph(editor: Editor): DiagramGraph {
 
 **Deliverable**: AI obserwuje diagram w real-time. Gdy user dodaje komponenty, AI reaguje pytaniami. Cały interview flow działa end-to-end.
 
+### Sprint 4b — Voice Agent (ElevenLabs STT + TTS)
+
+| Zadanie | Estymacja | Opis |
+|---|---|---|
+| ElevenLabs API client (server) | 2h | SDK/config, env vars (ELEVENLABS_API_KEY) |
+| ElevenLabs STT integration | 4h | Speech-to-Text: audio upload → transcript (Scribe v2 lub file-based) |
+| ElevenLabs TTS integration | 4h | Text-to-Speech: response text → audio stream (streaming) |
+| Voice WebSocket protocol | 3h | `voice.audio` (client→server), `voice.transcript`, `voice.audio_chunk` (server→client) |
+| Voice handler (server) | 6h | Receive audio → STT → AI turn → TTS → stream audio chunks to client |
+| Client: microphone capture | 4h | MediaRecorder / getUserMedia, chunk upload via WS |
+| Client: audio playback | 3h | Web Audio API, stream chunks, play while receiving |
+| Voice mode UI | 4h | Toggle chat/voice, mic button, speaking/listening states, waveform |
+| Session mode selection | 2h | Chat / Voice / Hybrid przy starcie sesji |
+| Voice transcript persistence | 2h | Zapisywanie voice_transcript do messages (source) |
+| **Sprint 4b Total** | **~34h** | |
+
+**Deliverable**: User może prowadzić interview głosowo. Mówi do mikrofonu → STT → AI odpowiada → TTS odtwarza odpowiedź. Tryb voice/hybrid dostępny w sesji.
+
+**Zależności**: ElevenLabs API key (https://elevenlabs.io), konto z dostępem do STT + TTS.
+
 ### Sprint 5 — Evaluation (Tydzień 8)
 
 | Zadanie | Estymacja | Opis |
@@ -1209,10 +1237,11 @@ export function extractDiagramGraph(editor: Editor): DiagramGraph {
 | 2 — Problems & Session | 4 | 25h | Problem bank, session flow |
 | 3 — Chat + WebSocket | 5 | 27h | AI chat, streaming, prompts |
 | 4 — Diagram Observation | 6-7 | 35h | Observer, static analysis, interjections |
+| 4b — Voice Agent | 7 | 34h | ElevenLabs STT + TTS, voice mode UI |
 | 5 — Evaluation | 8 | 25h | End session, scoring, PDF |
 | 6 — Dashboard & Polish | 9 | 27h | History, stats, error handling |
 | 7 — Production Ready | 10 | 24h | Deploy, monitoring, landing page |
-| **Total** | **10 tygodni** | **~217h** | |
+| **Total** | **10 tygodni** | **~251h** | |
 
 ### Realność
 

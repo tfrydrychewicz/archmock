@@ -26,6 +26,7 @@ function debounce<A extends unknown[]>(fn: (...args: A) => void, ms: number) {
 export function SessionLayout({
   sessionId,
   problem,
+  currentPhase,
   diagramDocument,
   notesDocument,
   onSaveDiagram,
@@ -33,6 +34,7 @@ export function SessionLayout({
 }: {
   sessionId: string;
   problem?: Problem;
+  currentPhase?: string;
   diagramDocument: unknown;
   notesDocument: string;
   onSaveDiagram: (snapshot: unknown) => Promise<void>;
@@ -119,6 +121,7 @@ export function SessionLayout({
         <ChatPanel
           sessionId={sessionId}
           problemStatement={problem?.statement}
+          currentPhase={currentPhase}
         />
       </Panel>
     </Group>

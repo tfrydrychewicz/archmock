@@ -1,0 +1,21 @@
+---
+description: Use shared types from packages/shared — no duplicate definitions
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: false
+---
+
+# ArchMock Shared Types
+
+All canonical types live in `packages/shared`:
+
+- **Diagram**: `DiagramGraph`, `DiagramNode`, `DiagramEdge`, `DiagramZone`, `SDShapeType`, `SDProtocol` — from `@archmock/shared` or `packages/shared/src/types/diagram.ts`
+- **WebSocket**: `ClientMessage`, `ServerMessage` — from `packages/shared/src/types/ws.ts`
+- **Problem**: `SDProblem` — from `packages/shared/src/types/problem.ts`
+- **Evaluation**: `Evaluation`, `DimensionScore` — from `packages/shared/src/types/evaluation.ts`
+- **Session**: `Phase`, session-related types — from `packages/shared/src/types/session.ts`
+
+**Rules**:
+- Do NOT redefine these types in apps. Import from `@archmock/shared`.
+- When extending, add to shared package and re-export.
+- WebSocket handlers must validate incoming messages against the `ClientMessage` union.
+- Diagram extraction must produce `DiagramGraph` matching the shared schema.

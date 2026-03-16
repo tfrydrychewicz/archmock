@@ -1,0 +1,14 @@
+---
+description: tldraw whiteboard, custom SD shapes, and graph extraction
+globs: "apps/web/**/whiteboard/**/*,apps/web/**/shapes/**/*,packages/shared/**/diagram*.ts"
+alwaysApply: false
+---
+
+# ArchMock Whiteboard
+
+- **Engine**: tldraw (embedded, customized). Custom shapes extend `ShapeUtil` from tldraw.
+- **SD shape types** (MVP): `sd-service`, `sd-database`, `sd-cache`, `sd-queue`, `sd-load-balancer`, `sd-cdn`, `sd-client`, `sd-storage`, `sd-zone`, plus `arrow` for edges.
+- **Graph extraction**: `extractDiagramGraph(editor)` must produce `DiagramGraph` with `nodes`, `edges`, `zones`, and optional `metadata`. Map tldraw shapes to `DiagramNode`/`DiagramEdge`/`DiagramZone`. Arrows use bindings for `from`/`to`.
+- **Change debounce**: Client debounces diagram updates (2s idle) before sending to server. Avoid flooding on drag.
+- **Arrow labels**: Support protocol labels (REST, gRPC, async). Use `isAsync` for dashed edges.
+- **Tests**: Graph extractor must have unit tests for edge cases (empty canvas, zones, disconnected nodes).

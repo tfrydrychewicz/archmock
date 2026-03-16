@@ -1,0 +1,29 @@
+---
+description: TypeScript and code quality standards for ArchMock
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: false
+---
+
+# ArchMock TypeScript Standards
+
+- **Strict TypeScript**: No `any`. Use proper types from `@archmock/shared` or define interfaces.
+- **Error handling**: Always handle errors explicitly. Log and rethrow with context.
+
+```typescript
+// ❌ BAD
+try {
+  await saveSession(data);
+} catch (e) {}
+
+// ✅ GOOD
+try {
+  await saveSession(data);
+} catch (e) {
+  logger.error('Failed to save session', { sessionId: data.id, error: e });
+  throw new SessionSaveError('Unable to persist session', { cause: e });
+}
+```
+
+- **Async/await**: Prefer async/await over raw Promises. Avoid swallowing rejections.
+- **Imports**: Use `@archmock/shared` for shared types. Use `@archmock/db` for schema. No cross-app imports (web ↔ ws-server).
+- **Validation**: Validate external input with Zod. Use Zod schemas for API payloads and WebSocket messages.

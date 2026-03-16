@@ -1,0 +1,13 @@
+---
+description: ArchMock design and implementation plan references
+alwaysApply: true
+---
+
+# ArchMock Design Context
+
+When working on this codebase, refer to these documents for design decisions and implementation guidance:
+
+- **System design**: `archmock-system-design.md` — architecture, components, data models, and technical specifications
+- **Implementation plan**: `archmock-mvp-implementation-plan.md` — MVP scope, project structure, phases, and implementation details
+
+Consult these documents before making architectural changes or implementing new features.

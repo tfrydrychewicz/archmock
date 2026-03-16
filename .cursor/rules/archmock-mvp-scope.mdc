@@ -1,0 +1,28 @@
+---
+description: MVP scope — what is in and out of the initial release
+alwaysApply: true
+---
+
+# ArchMock MVP Scope
+
+**IN scope**:
+- Auth (email + Google OAuth via Clerk)
+- 10 curated SD problems
+- Whiteboard with custom SD shapes (service, DB, cache, queue, LB, CDN, client, storage, zone, arrow)
+- DiagramGraph extraction from canvas
+- Chat with AI interviewer (Claude Sonnet, streaming)
+- Real-time diagram observation (graph JSON only — no vision/PNG)
+- Interjection engine — AI reacts to canvas changes
+- Final evaluation (Claude Opus)
+- Session history with results
+- PDF export of session
+
+**OUT of scope** (Phase 2+):
+- Voice agent
+- Vision-based diagram analysis / PNG snapshots
+- Billing / Stripe
+- Multiplayer
+- Community problems
+- Marketplace / B2B dashboard
+
+When implementing, do not add Phase 2+ features. Stick to the MVP checklist in the implementation plan.

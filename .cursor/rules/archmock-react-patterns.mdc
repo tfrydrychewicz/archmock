@@ -1,0 +1,15 @@
+---
+description: Next.js 15 and React patterns for ArchMock frontend
+globs: "apps/web/**/*.tsx,apps/web/**/*.ts"
+alwaysApply: false
+---
+
+# ArchMock React & Next.js Patterns
+
+- **Framework**: Next.js 15 App Router. Use `app/` for routes. Server components by default; add `"use client"` only when needed (canvas, chat, Zustand).
+- **State**: Zustand for session state (diagram, chat history, phase). Zustand works outside React tree — required for tldraw/canvas.
+- **UI**: shadcn/ui components. Tailwind v4 for styling. Design tokens via CSS variables.
+- **Auth**: Clerk. Use `auth()` in server components, `useAuth()` in client. Protect routes with middleware.
+- **Layout**: Session page = whiteboard (70%) + chat panel (30%). Responsive: stacked on mobile.
+- **Chat**: Markdown rendering, code blocks, streaming tokens. Use `react-markdown` for AI responses.
+- **No cross-app imports**: `apps/web` does not import from `apps/ws-server`. Use shared package and API/WS for communication.

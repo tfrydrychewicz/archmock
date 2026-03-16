@@ -1,0 +1,54 @@
+id: url-shortener
+title: "Design a URL Shortener"
+difficulty: mid
+category: [storage, distributed-systems, web]
+companies: [google, meta, amazon, twitter]
+timeLimit: 45
+
+statement: |
+  Design a URL shortening service like bit.ly or tinyurl.com.
+  The service should:
+  - Accept a long URL and return a short URL
+  - Redirect users from the short URL to the original URL
+  - Handle high traffic efficiently
+  - Track basic analytics (click count)
+
+clarifications:
+  - question: "How many URLs do we need to handle?"
+    answer: "Assume 100M new URLs per month, with a 10:1 read-to-write ratio (1B redirects/month)."
+    keywords: [scale, traffic, urls, how many, volume]
+  - question: "How long should short URLs be?"
+    answer: "As short as possible, but that's a design decision for you to make. Think about the trade-offs."
+    keywords: [length, characters, short, how long]
+  - question: "Do short URLs expire?"
+    answer: "Let's say by default they don't expire, but users can set a custom expiration."
+    keywords: [expire, expiration, ttl, delete, lifetime]
+  - question: "Do we need user accounts?"
+    answer: "For MVP, no authentication needed. Anyone can create a short URL. Analytics are public."
+    keywords: [auth, login, user, account]
+
+evaluationGuide:
+  expectedComponents:
+    - "API Gateway / Load Balancer"
+    - "URL Shortening Service"
+    - "Database for URL mappings (key-value or relational)"
+    - "Cache layer (Redis/Memcached) for hot URLs"
+    - "Analytics service or counter"
+    - "Base62/Base58 encoding or hash-based ID generation"
+  scalingConcerns:
+    - "Read-heavy workload (10:1) — caching is critical"
+    - "Key generation at scale — hash collisions, counter-based vs random"
+    - "Database sharding strategy for URL mappings"
+  commonMistakes:
+    - "Using auto-increment IDs (predictable, security concern)"
+    - "No caching layer despite 10:1 read ratio"
+    - "Single database without considering sharding"
+  deepDiveTopics:
+    - "Key generation: Base62 encoding vs MD5/SHA hash truncation"
+    - "Cache eviction strategy for URL redirects"
+    - "Database choice: SQL vs NoSQL for this access pattern"
+  followUpConstraints:
+    - "Now a URL goes viral and gets 1M clicks/sec. How does your design handle it?"
+  exampleGoodQuestions:
+    - "What's our target latency for redirects?"
+    - "Do we need to support custom short URLs (vanity URLs)?"

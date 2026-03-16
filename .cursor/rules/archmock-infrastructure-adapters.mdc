@@ -1,0 +1,15 @@
+---
+description: Infrastructure abstraction — adapter pattern for DB, Redis, Storage
+alwaysApply: true
+---
+
+# ArchMock Infrastructure Adapters
+
+**Principle**: Every infrastructure dependency is behind an abstraction. The app does not know if it talks to local Docker or production Neon/Upstash/R2.
+
+- **Database**: Use Drizzle ORM via `packages/db`. Connection string from `DATABASE_URL`. Never hardcode connection details.
+- **Redis**: Use a Redis client wrapper. Connection from `REDIS_URL`. Used for session state, rate limits.
+- **Storage**: Implement `StorageService` interface. Local: `./storage/`. Production: R2/S3 via adapter. Never write directly to filesystem in app code.
+- **AI**: Wrap Anthropic SDK in `infra/ai.ts`. Use env vars for model overrides (`AI_MODEL_REALTIME`, `AI_MODEL_EVALUATION`).
+
+When adding new infra (email, queues, etc.), define an interface first, then implement adapters for local and production.

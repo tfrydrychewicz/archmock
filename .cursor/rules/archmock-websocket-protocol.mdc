@@ -1,0 +1,18 @@
+---
+description: WebSocket message types and handler patterns
+globs: "apps/ws-server/**/*.ts,packages/shared/**/ws*.ts,apps/web/**/*ws*.ts"
+alwaysApply: false
+---
+
+# ArchMock WebSocket Protocol
+
+Message types are defined in `packages/shared/src/types/ws.ts`. Do not deviate.
+
+**Client → Server**: `chat.send`, `diagram.update`, `session.end`, `session.request_evaluation`, `ping`
+**Server → Client**: `chat.stream`, `chat.done`, `observation.interjection`, `session.phase_change`, `session.evaluation_ready`, `session.evaluation_progress`, `error`, `pong`
+
+- **Auth**: Validate token on WS upgrade. Reject unauthenticated connections.
+- **Session binding**: Each WS is bound to one session. Load session from DB on connect.
+- **Reconnect**: Support reconnection with message replay. State in Redis + DB.
+- **Heartbeat**: Client sends `ping`; server responds `pong`. Handle disconnects gracefully.
+- **Validation**: Parse and validate every incoming message with Zod before processing.

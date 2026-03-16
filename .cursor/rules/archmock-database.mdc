@@ -1,0 +1,15 @@
+---
+description: Drizzle schema, migrations, and database conventions
+globs: "packages/db/**/*.ts,apps/**/infra/db*.ts"
+alwaysApply: false
+---
+
+# ArchMock Database
+
+- **ORM**: Drizzle. Schema in `packages/db/src/schema.ts`.
+- **Tables**: `users`, `problems`, `sessions`, `messages`, `diagram_snapshots`, `observations`, `evaluations`. Match the schema in the implementation plan.
+- **Enums**: Use `pgEnum` for `session_status`, `session_mode`, `phase`, `message_role`, etc.
+- **Indexes**: Add indexes on `userId`, `sessionId`, `status` for common queries.
+- **Migrations**: Generate with `pnpm db:generate`. Never edit migration files by hand after generation.
+- **Seeding**: Problem bank seeded via `packages/db/seed.ts`. Problems loaded from YAML in `problems/`.
+- **Row-level**: Ensure queries filter by `userId` where appropriate. Users only access their own sessions.

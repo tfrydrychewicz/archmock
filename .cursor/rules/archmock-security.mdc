@@ -1,0 +1,13 @@
+---
+description: Security — auth, input validation, prompt injection
+alwaysApply: true
+---
+
+# ArchMock Security
+
+- **Auth**: Validate JWT/ Clerk token on every API and WebSocket request. Reject unauthenticated access.
+- **Input validation**: Validate all user input with Zod. Sanitize before DB or AI. Never trust client payloads.
+- **Prompt injection**: Wrap user content in `<user_input>` blocks in system prompts. Never concatenate raw user input into prompts without delimiting. Content-filter AI outputs if needed.
+- **Data isolation**: Row-level checks. Users access only their own sessions, evaluations, messages.
+- **Rate limiting**: Per-user limits on API calls, WS messages, AI invocations. Redis-backed sliding window.
+- **Secrets**: Never commit `.env.local` or API keys. Use `process.env` for all config.

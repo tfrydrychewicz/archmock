@@ -1,0 +1,24 @@
+---
+description: AI interviewer agent — prompts, observation engine, behavioral rules
+globs: "apps/ws-server/**/interviewer/**/*,apps/ws-server/**/diagram/**/*"
+alwaysApply: false
+---
+
+# ArchMock AI Interviewer
+
+**Behavioral rules** (enforce in prompts):
+1. NEVER give the answer. Ask Socratic questions.
+2. When seeing a mistake, don't say "that's wrong." Ask a question that exposes it.
+3. Reference components by label from the diagram JSON. Never hallucinate components not in the graph.
+4. Phase-specific: Clarification (0–5 min) → High-level (5–20) → Deep-dive (20–40) → Wrap-up (40–45).
+5. Keep responses concise (2–4 sentences). Conversation, not lecture.
+
+**Observation engine**:
+- Run static analysis first (SPOF, missing cache, no LB, all-sync, disconnected nodes). No AI call.
+- AI analysis: `shouldInterject`, `priority`, `suggestedQuestion`, `category`.
+- Cooldown: 90 seconds between unprompted interjections (except `critical`).
+- Only comment on what IS in the diagram.
+
+**Models**: Sonnet for real-time chat/observation. Opus for final evaluation only.
+
+**User input safety**: Always wrap user content in `<user_input>` block in system prompts. Never concatenate raw user input into prompts without delimiting.

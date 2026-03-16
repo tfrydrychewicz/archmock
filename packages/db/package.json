@@ -1,0 +1,30 @@
+{
+  "name": "@archmock/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "push": "drizzle-kit push",
+    "studio": "drizzle-kit studio",
+    "seed": "tsx src/seed.ts",
+    "reset": "tsx src/reset.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Lint skipped (no config)'"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.38.0",
+    "postgres": "^3.4.0"
+  },
+  "devDependencies": {
+    "@archmock/shared": "workspace:*",
+    "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.30.0",
+    "@types/js-yaml": "^4.0.0",
+    "js-yaml": "^4.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

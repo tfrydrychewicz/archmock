@@ -10,9 +10,19 @@ pnpm install
 
 # 2. Start infra
 echo "🐳 Starting Docker services..."
-docker compose up -d
+docker-compose up -d
 echo "⏳ Waiting for PostgreSQL..."
-sleep 3
+for i in $(seq 1 30); do
+  if docker exec archmock-db pg_isready -U archmock -d archmock 2>/dev/null; then
+    break
+  fi
+  if [ $i -eq 30 ]; then
+    echo "❌ PostgreSQL failed to become ready. If you have stale volumes, run:"
+    echo "   docker-compose down -v && docker-compose up -d"
+    exit 1
+  fi
+  sleep 1
+done
 
 # 3. Setup database
 echo "🗄️  Running migrations..."

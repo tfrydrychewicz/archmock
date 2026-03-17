@@ -5,6 +5,6 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgresql://archmock:archmock_dev@localhost:5432/archmock",
+    url: process.env.DATABASE_URL ?? "postgresql://archmock:archmock_dev@localhost:5433/archmock",
   },
 });

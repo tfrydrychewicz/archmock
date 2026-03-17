@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@archmock/db": "workspace:*",
+    "dotenv": "^16.4.0",
     "@archmock/shared": "workspace:*",
     "@clerk/nextjs": "^6.12.0",
     "@elevenlabs/react": "^0.14.2",

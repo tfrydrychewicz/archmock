@@ -78,7 +78,7 @@ async function loadProblems(): Promise<SDProblem[]> {
 async function seed() {
   const connectionString =
     process.env.DATABASE_URL ??
-    "postgresql://archmock:archmock_dev@localhost:5432/archmock";
+    "postgresql://archmock:archmock_dev@localhost:5433/archmock";
 
   const client = postgres(connectionString, { max: 1 });
   const db = drizzle(client);

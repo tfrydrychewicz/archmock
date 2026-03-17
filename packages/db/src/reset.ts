@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 
 const connectionString =
   process.env.DATABASE_URL ??
-  "postgresql://archmock:archmock_dev@localhost:5432/archmock";
+  "postgresql://archmock:archmock_dev@localhost:5433/archmock";
 
 async function reset() {
   const client = postgres(connectionString, { max: 1 });

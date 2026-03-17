@@ -7,7 +7,7 @@ export type ClientMessage =
   | { type: "voice.audio"; audioBase64: string }
   | { type: "voice.transcript"; content: string }
   | { type: "voice.transcript_check"; content: string }
-  | { type: "session.end" }
+  | { type: "session.end"; diagram?: DiagramGraph }
   | { type: "session.request_evaluation" }
   | { type: "ping" };
 

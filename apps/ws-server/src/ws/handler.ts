@@ -5,6 +5,7 @@ import { sessions, users } from "@archmock/db";
 import { handleChatSend } from "../services/chatHandler";
 import { handleDiagramUpdate } from "../services/diagramUpdateHandler";
 import { handleVoiceAudio, handleVoiceTranscript, handleVoiceTranscriptCheck } from "../services/voiceHandler";
+import { handleSessionEnd } from "../services/sessionEndHandler";
 import type { ClientMessage, DiagramGraph } from "@archmock/shared";
 
 type SendFn = (msg: object) => void;
@@ -113,10 +114,14 @@ export function createWSHandlers(
             });
             break;
           case "session.end":
-            // TODO: end session
+            await handleSessionEnd(
+              sid,
+              msg.diagram ?? null,
+              sendToClient
+            );
             break;
           case "session.request_evaluation":
-            // TODO: trigger evaluation
+            await handleSessionEnd(sid, previousGraph, sendToClient);
             break;
           default:
             break;

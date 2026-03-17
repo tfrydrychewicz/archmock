@@ -6,6 +6,7 @@ import { SessionWhiteboard } from "./SessionWhiteboard";
 import { TextPane } from "./TextPane";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { useSessionWebSocketContext } from "@/contexts/SessionWebSocketContext";
+import type { DiagramGraph } from "@archmock/shared";
 
 type Problem = {
   id: string;
@@ -31,6 +32,8 @@ export function SessionLayout({
   notesDocument,
   onSaveDiagram,
   onSaveNotes,
+  latestGraphRef,
+  isSessionEnded,
 }: {
   sessionId: string;
   problem?: Problem;
@@ -39,6 +42,8 @@ export function SessionLayout({
   notesDocument: string;
   onSaveDiagram: (snapshot: unknown) => Promise<void>;
   onSaveNotes: (notes: string) => Promise<void>;
+  latestGraphRef?: React.MutableRefObject<DiagramGraph | null>;
+  isSessionEnded?: boolean;
 }) {
   const [notes, setNotes] = useState(notesDocument);
   const saveNotesRef = useRef(onSaveNotes);
@@ -65,10 +70,11 @@ export function SessionLayout({
 
   const { send } = useSessionWebSocketContext();
   const handleDiagramChange = useCallback(
-    (graph: import("@archmock/shared").DiagramGraph) => {
+    (graph: DiagramGraph) => {
+      latestGraphRef && (latestGraphRef.current = graph);
       send({ type: "diagram.update", graph });
     },
-    [send]
+    [send, latestGraphRef]
   );
 
   return (
@@ -105,6 +111,7 @@ export function SessionLayout({
           initialSnapshot={diagramDocument}
           onSave={onSaveDiagram}
           onDiagramChange={handleDiagramChange}
+          readOnly={isSessionEnded}
         />
       </Panel>
       <Separator

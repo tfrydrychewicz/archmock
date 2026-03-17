@@ -52,11 +52,13 @@ export function SessionWhiteboard({
   initialSnapshot,
   onSave,
   onDiagramChange,
+  readOnly,
 }: {
   sessionId: string;
   initialSnapshot: unknown;
   onSave: (snapshot: unknown) => Promise<void>;
   onDiagramChange?: (graph: DiagramGraph) => void;
+  readOnly?: boolean;
 }) {
   const store = useMemo(
     () =>
@@ -119,12 +121,17 @@ export function SessionWhiteboard({
         store={store}
         shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}
         components={{ StylePanel: null }}
+        onMount={(editor) => {
+          if (readOnly) editor.updateInstanceState({ isReadonly: true });
+        }}
       >
-        {onDiagramChange && <DiagramChangeNotifier onDiagramChange={onDiagramChange} />}
-        <div className="absolute left-4 top-20 z-[300]">
-          <ShapePalette />
-        </div>
-        <ShapePropertiesPanel />
+        {onDiagramChange && !readOnly && <DiagramChangeNotifier onDiagramChange={onDiagramChange} />}
+        {!readOnly && (
+          <div className="absolute left-4 top-20 z-[300]">
+            <ShapePalette />
+          </div>
+        )}
+        {!readOnly && <ShapePropertiesPanel />}
       </Tldraw>
     </div>
   );

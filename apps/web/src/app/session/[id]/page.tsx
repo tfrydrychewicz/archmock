@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { SessionPageClient } from "./SessionPageClient";
 import { db } from "@/lib/db";
-import { sessions, users, problems } from "@archmock/db";
+import { sessions, users, problems, evaluations } from "@archmock/db";
 import { eq, and } from "drizzle-orm";
 
 export default async function SessionPage({
@@ -46,11 +46,22 @@ export default async function SessionPage({
       }
     : undefined;
 
+  let evaluationId: string | undefined;
+  if (session.status === "completed") {
+    const [evalRow] = await db
+      .select({ id: evaluations.id })
+      .from(evaluations)
+      .where(eq(evaluations.sessionId, id))
+      .limit(1);
+    evaluationId = evalRow?.id;
+  }
+
   return (
     <SessionPageClient
       sessionId={id}
       problem={problem}
       status={session.status ?? "active"}
+      evaluationId={evaluationId}
       currentPhase={(session.currentPhase ?? "clarification") as "clarification" | "high_level" | "deep_dive" | "wrap_up"}
       startedAt={session.startedAt?.toISOString() ?? new Date().toISOString()}
       diagramDocument={session.diagramDocument ?? undefined}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatMessageContent } from "./ChatMessageContent";
+import { VoiceWaveform } from "./VoiceWaveform";
 import { useSessionWebSocketContext } from "@/contexts/SessionWebSocketContext";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { useVoiceScribe } from "@/hooks/useVoiceScribe";
@@ -279,17 +280,28 @@ export function ChatPanel({
       )}
 
       {voiceMode === "voice" && (
-        <div className="border-t p-4 flex flex-col items-center gap-2">
+        <div className="border-t flex flex-col min-h-[140px]">
+          <div className="relative flex-1 min-h-[120px] bg-muted/80 dark:bg-zinc-900/80">
+            <VoiceWaveform
+              isActive={voiceMode === "voice"}
+              isConnected={isConnected}
+              isPlayingAudio={isPlayingAudio}
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
+              <div className="pointer-events-auto">
+                <VoiceMicButton
+                  isListening={isConnected}
+                  isPlayingAudio={isPlayingAudio}
+                  onStart={connect}
+                  onStop={disconnect}
+                  disabled={status !== "connected"}
+                />
+              </div>
+            </div>
+          </div>
           {tokenError && (
-            <p className="text-sm text-destructive">{tokenError}</p>
+            <p className="text-sm text-destructive px-4 py-2">{tokenError}</p>
           )}
-          <VoiceMicButton
-            isListening={isConnected}
-            isPlayingAudio={isPlayingAudio}
-            onStart={connect}
-            onStop={disconnect}
-            disabled={status !== "connected"}
-          />
         </div>
       )}
     </div>

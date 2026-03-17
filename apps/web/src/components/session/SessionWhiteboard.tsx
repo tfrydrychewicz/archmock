@@ -13,6 +13,7 @@ import "../whiteboard/shape-types";
 import "tldraw/tldraw.css";
 import { ShapePalette } from "../whiteboard/ShapePalette";
 import { ShapePropertiesPanel } from "../whiteboard/ShapePropertiesPanel";
+import { TldrawThemeSync } from "../whiteboard/TldrawThemeSync";
 import { DiagramChangeNotifier } from "../whiteboard/DiagramChangeNotifier";
 import type { DiagramGraph } from "@archmock/shared";
 import {
@@ -118,6 +119,7 @@ export function SessionWhiteboard({
   return (
     <div className="h-full w-full relative">
       <Tldraw
+        inferDarkMode
         store={store}
         shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}
         components={{ StylePanel: null }}
@@ -125,6 +127,7 @@ export function SessionWhiteboard({
           if (readOnly) editor.updateInstanceState({ isReadonly: true });
         }}
       >
+        <TldrawThemeSync />
         {onDiagramChange && !readOnly && <DiagramChangeNotifier onDiagramChange={onDiagramChange} />}
         {!readOnly && (
           <div className="absolute left-4 top-20 z-[300]">

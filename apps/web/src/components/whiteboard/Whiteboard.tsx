@@ -7,6 +7,7 @@ import "tldraw/tldraw.css";
 import { extractDiagramGraph } from "./graph-extractor";
 import { ShapePalette } from "./ShapePalette";
 import { ShapePropertiesPanel } from "./ShapePropertiesPanel";
+import { TldrawThemeSync } from "./TldrawThemeSync";
 import {
   SDServiceShapeUtil,
   SDDatabaseShapeUtil,
@@ -38,6 +39,7 @@ export function Whiteboard() {
     <div className="fixed inset-0 flex">
       <div className="flex-1 relative">
         <Tldraw
+          inferDarkMode
           shapeUtils={[...defaultShapeUtils, ...SHAPE_UTILS]}
           onMount={(editor) => {
             const interval = setInterval(() => {
@@ -51,6 +53,7 @@ export function Whiteboard() {
             return () => clearInterval(interval);
           }}
         >
+          <TldrawThemeSync />
           <div className="absolute left-4 top-20 z-[300]">
             <ShapePalette />
           </div>

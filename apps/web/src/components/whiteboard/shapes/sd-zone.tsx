@@ -6,6 +6,8 @@ import {
   resizeBox,
   ShapeUtil,
   type TLResizeInfo,
+  type TLShape,
+  type TLDragShapesOutInfo,
 } from "tldraw";
 import type { SDZoneShape } from "../shape-types";
 
@@ -60,15 +62,73 @@ export class SDZoneShapeUtil extends ShapeUtil<SDZoneShape> {
 
   override onResize(shape: SDZoneShape, info: TLResizeInfo<SDZoneShape>) {
     const resized = resizeBox(shape, info);
+    const newW = Math.max(200, resized.props.w);
+    const newH = Math.max(150, resized.props.h);
+    const oldW = info.initialShape.props.w;
+    const oldH = info.initialShape.props.h;
+    const scaleX = newW / oldW;
+    const scaleY = newH / oldH;
+
+    if (scaleX !== 1 || scaleY !== 1) {
+      const childIds = this.editor.getSortedChildIdsForParent(shape.id);
+      const updates = [];
+      for (const id of childIds) {
+        const child = this.editor.getShape(id);
+        if (!child) continue;
+        const props = child.props as Record<string, unknown>;
+        const next: { id: typeof id; type: string; x: number; y: number; props?: Record<string, unknown> } = {
+          id,
+          type: child.type,
+          x: child.x / scaleX,
+          y: child.y / scaleY,
+        };
+        if (typeof props?.w === "number" && typeof props?.h === "number") {
+          next.props = { ...props, w: props.w / scaleX, h: props.h / scaleY };
+        }
+        updates.push(next);
+      }
+      if (updates.length > 0) {
+        this.editor.updateShapes(updates);
+      }
+    }
+
     return {
       ...shape,
       x: resized.x,
       y: resized.y,
       props: {
         ...shape.props,
-        w: Math.max(200, resized.props.w),
-        h: Math.max(150, resized.props.h),
+        w: newW,
+        h: newH,
       },
     };
+  }
+
+  override canReceiveNewChildrenOfType(_shape: SDZoneShape, type: string) {
+    return type.startsWith("sd-") || type === "arrow" || type === "geo" || type === "text" || type === "note";
+  }
+
+  override onDragShapesIn(shape: SDZoneShape, draggingShapes: TLShape[]) {
+    const toReparent = draggingShapes.filter((s) => {
+      if (s.parentId === shape.id) return false;
+      if (s.id === shape.id) return false;
+      if (this.editor.hasAncestor(shape, s.id)) return false;
+      return true;
+    });
+    if (toReparent.length > 0) {
+      this.editor.reparentShapes(toReparent, shape.id);
+    }
+  }
+
+  override onDragShapesOut(
+    shape: SDZoneShape,
+    draggingShapes: TLShape[],
+    info: TLDragShapesOutInfo
+  ) {
+    if (info.nextDraggingOverShapeId) return;
+    const children = draggingShapes.filter((s) => s.parentId === shape.id);
+    if (children.length > 0) {
+      this.editor.reparentShapes(children, this.editor.getCurrentPageId());
+    }
   }
 }

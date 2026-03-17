@@ -165,11 +165,13 @@ export async function handleSessionEnd(
 
   sendToClient({ type: "session.evaluation_progress", step: "Analyzing conversation..." });
 
+  const notesDocument = (session.notesDocument as string | null) ?? "";
   const input: EvaluationInput = {
     problem,
     finalDiagram: graph,
     diagramHistory,
     conversationTranscript: conversationTranscript || "(No conversation recorded)",
+    notesDocument,
     observations: observationsList,
     sessionDurationMin,
   };

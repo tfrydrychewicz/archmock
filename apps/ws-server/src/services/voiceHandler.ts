@@ -267,12 +267,14 @@ async function processVoiceTranscript(
     .where(eq(messages.sessionId, sessionId))
     .orderBy(messages.createdAt);
 
+  const notesDocument = (session.notesDocument as string | null) ?? "";
   const systemPrompt = buildVoiceInterviewerSystemPrompt(
     problem,
     phase,
     diagram,
     timeLimit,
-    elapsedMinutes
+    elapsedMinutes,
+    notesDocument
   );
 
   const apiMessages = [

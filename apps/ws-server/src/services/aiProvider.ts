@@ -212,13 +212,17 @@ export async function analyzeDiagramWithAI(
   changes: string[],
   staticIssues: string[],
   phase: string,
-  conversationSummary: string
+  conversationSummary: string,
+  notesDocument: string = ""
 ): Promise<ObservationResult | null> {
+  const notesSection = notesDocument.trim()
+    ? `\nCandidate's notes/requirements:\n${notesDocument.trim()}\n`
+    : "";
   const prompt = `You are analyzing a system design diagram for: "${problem.title}"
 
 Current diagram:
 ${JSON.stringify(currentGraph, null, 2)}
-
+${notesSection}
 Recent changes: ${changes.join("; ") || "none"}
 Static analysis issues: ${staticIssues.join("; ") || "none"}
 Current phase: ${phase}

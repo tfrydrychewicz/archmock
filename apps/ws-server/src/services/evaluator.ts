@@ -7,6 +7,7 @@ export type EvaluationInput = {
   finalDiagram: DiagramGraph;
   diagramHistory: { graph: DiagramGraph; timestamp: string }[];
   conversationTranscript: string;
+  notesDocument: string;
   observations: { observation: string; category: string; actionTaken: string }[];
   sessionDurationMin: number;
 };
@@ -24,6 +25,7 @@ export function buildEvaluationPrompt(input: EvaluationInput): string {
     finalDiagram,
     diagramHistory,
     conversationTranscript,
+    notesDocument,
     observations,
     sessionDurationMin,
   } = input;
@@ -31,6 +33,16 @@ export function buildEvaluationPrompt(input: EvaluationInput): string {
   const eg = problem.evaluationGuide;
   const expectedComponents = eg?.expectedComponents ?? [];
   const commonMistakes = eg?.commonMistakes ?? [];
+
+  const notesSection = notesDocument.trim()
+    ? `
+
+## Candidate's Notes / Requirements (from their left-side notes pane)
+\`\`\`
+${notesDocument.trim()}
+\`\`\`
+`
+    : "";
 
   return `You are evaluating a system design interview session.
 
@@ -45,7 +57,7 @@ ${expectedComponents.map((c) => `- ${c}`).join("\n")}
 
 ## Common Mistakes
 ${commonMistakes.map((m) => `- ${m}`).join("\n")}
-
+${notesSection}
 ## Final Diagram
 \`\`\`json
 ${JSON.stringify(finalDiagram, null, 2)}

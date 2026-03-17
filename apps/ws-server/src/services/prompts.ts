@@ -6,9 +6,25 @@ export function buildInterviewerSystemPrompt(
   phase: Phase,
   diagram: DiagramGraph,
   sessionDuration: number,
-  elapsedMinutes: number
+  elapsedMinutes: number,
+  notesDocument?: string
 ): string {
   const evalGuide = problem.evaluationGuide;
+  const notesSection =
+    notesDocument?.trim()
+      ? `
+
+## CANDIDATE'S NOTES / REQUIREMENTS (from their left-side notes pane)
+Use this to understand what they've documented—requirements, constraints, decisions.
+Reference it when relevant. Don't recite it back; use it to ask better follow-ups.
+
+\`\`\`
+${notesDocument.trim()}
+\`\`\`
+
+`
+      : "";
+
   return `You are a system design interviewer at a top tech company.
 You are conducting a ${sessionDuration}-minute system design interview.
 ${elapsedMinutes} minutes have elapsed. Current phase: ${phase}.
@@ -16,8 +32,7 @@ ${elapsedMinutes} minutes have elapsed. Current phase: ${phase}.
 ## THE PROBLEM
 Title: ${problem.title}
 Statement: ${problem.statement}
-
-## YOUR KNOWLEDGE (do not share directly)
+${notesSection}## YOUR KNOWLEDGE (do not share directly)
 Expected components: ${evalGuide.expectedComponents.join(", ")}
 Common mistakes to watch for: ${evalGuide.commonMistakes.join(", ")}
 Good deep-dive topics: ${evalGuide.deepDiveTopics.join(", ")}

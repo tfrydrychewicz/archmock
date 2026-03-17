@@ -20,7 +20,8 @@ export class DiagramObserver {
     currentGraph: DiagramGraph,
     previousGraph: DiagramGraph | null,
     conversationSummary: string,
-    phase: string
+    phase: string,
+    notesDocument?: string
   ): Promise<ObservationResult | null> {
     const staticIssues = runStaticAnalysis(currentGraph);
     const changes = computeChanges(currentGraph, previousGraph);
@@ -33,7 +34,8 @@ export class DiagramObserver {
       changes,
       staticIssues,
       phase,
-      conversationSummary
+      conversationSummary,
+      notesDocument ?? ""
     );
 
     if (!result) return null;

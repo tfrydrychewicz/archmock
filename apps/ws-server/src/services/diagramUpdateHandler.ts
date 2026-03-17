@@ -78,12 +78,14 @@ export async function handleDiagramUpdate(
     .map((m) => `${m.role}: ${(m.content ?? "").slice(0, 100)}`)
     .join("; ");
 
+  const notesDocument = (session.notesDocument as string | null) ?? "";
   const observer = new DiagramObserver(problem);
   const result = await observer.analyze(
     graph,
     previousGraph,
     conversationSummary,
-    phase
+    phase,
+    notesDocument
   );
 
   if (result?.shouldInterject && result.suggestedQuestion) {

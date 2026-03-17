@@ -6,17 +6,30 @@ export function buildVoiceInterviewerSystemPrompt(
   phase: Phase,
   diagram: DiagramGraph,
   sessionDuration: number,
-  elapsedMinutes: number
+  elapsedMinutes: number,
+  notesDocument?: string
 ): string {
   const evalGuide = problem.evaluationGuide;
+  const notesSection =
+    notesDocument?.trim()
+      ? `
+
+## CANDIDATE'S NOTES / REQUIREMENTS (from their left-side notes pane)
+Use this to understand what they've documented. Reference when relevant.
+
+\`\`\`
+${notesDocument.trim()}
+\`\`\`
+
+`
+      : "";
   return `You are a system design interviewer conducting a ${sessionDuration}-minute interview by VOICE.
 ${elapsedMinutes} minutes have elapsed. Current phase: ${phase}.
 
 ## THE PROBLEM
 Title: ${problem.title}
 Statement: ${problem.statement}
-
-## YOUR KNOWLEDGE (do not share directly)
+${notesSection}## YOUR KNOWLEDGE (do not share directly)
 Expected components: ${evalGuide.expectedComponents.join(", ")}
 Common mistakes: ${evalGuide.commonMistakes.join(", ")}
 Good deep-dive topics: ${evalGuide.deepDiveTopics.join(", ")}

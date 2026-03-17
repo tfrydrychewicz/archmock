@@ -40,7 +40,7 @@ export class SDClientShapeUtil extends ShapeUtil<SDClientShape> {
             {shape.props.label || "Client"}
           </span>
           {shape.props.subLabel && (
-            <span className="text-xs text-muted-foreground truncate w-full text-center">
+            <span className="text-xs text-muted-foreground w-full text-center whitespace-pre-wrap break-words">
               {shape.props.subLabel}
             </span>
           )}

@@ -45,7 +45,7 @@ export class SDStorageShapeUtil extends ShapeUtil<SDStorageShape> {
             {shape.props.label || "Storage"}
           </span>
           {shape.props.subLabel && (
-            <span className="text-xs text-muted-foreground truncate w-full text-center">
+            <span className="text-xs text-muted-foreground w-full text-center whitespace-pre-wrap break-words">
               {shape.props.subLabel}
             </span>
           )}

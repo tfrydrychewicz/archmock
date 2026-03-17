@@ -14,6 +14,21 @@ const SHAPES_WITH_SUBLABEL: SDShapeType[] = [
   "sd-storage",
 ];
 
+const MIN_HEIGHT: Record<SDShapeType, number> = {
+  "sd-service": 60,
+  "sd-database": 70,
+  "sd-cache": 50,
+  "sd-queue": 50,
+  "sd-load-balancer": 60,
+  "sd-cdn": 40,
+  "sd-client": 40,
+  "sd-storage": 50,
+  "sd-zone": 150,
+};
+
+const LABEL_ICON_HEIGHT = 64;
+const LINE_HEIGHT = 22;
+
 export function ShapePropertiesPanel() {
   const editor = useEditor();
   const selectedShape = useValue(
@@ -36,10 +51,19 @@ export function ShapePropertiesPanel() {
   const hasSubLabel = SHAPES_WITH_SUBLABEL.includes(type);
 
   const updateProp = (key: string, value: string) => {
+    const newProps = { ...props, [key]: value };
+    if (key === "subLabel" && hasSubLabel) {
+      const trimmed = value.trim();
+      const lineCount = trimmed ? (trimmed.match(/\n/g) || []).length + 1 : 0;
+      const minH = MIN_HEIGHT[type] ?? 60;
+      const contentHeight =
+        LABEL_ICON_HEIGHT + (lineCount > 0 ? lineCount * LINE_HEIGHT : 0);
+      newProps.h = Math.max(minH, contentHeight);
+    }
     editor.updateShape({
       id: selectedShape.id,
       type,
-      props: { ...props, [key]: value },
+      props: newProps,
     });
   };
 
@@ -64,8 +88,8 @@ export function ShapePropertiesPanel() {
             <label className="mb-1 block text-xs text-slate-500">
               Details
             </label>
-            <input
-              type="text"
+            <textarea
+              rows={3}
               value={(props?.subLabel as string) ?? ""}
               onChange={(e) => updateProp("subLabel", e.target.value)}
               placeholder={
@@ -81,7 +105,7 @@ export function ShapePropertiesPanel() {
                           ? "S3 / GCS / Blob"
                           : "Tech or details"
               }
-              className="w-full rounded border border-slate-600 bg-slate-900/80 px-2 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full resize-y min-h-[4rem] rounded border border-slate-600 bg-slate-900/80 px-2 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         )}

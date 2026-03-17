@@ -4,7 +4,7 @@ import { db } from "../lib/db";
 import { sessions, users } from "@archmock/db";
 import { handleChatSend } from "../services/chatHandler";
 import { handleDiagramUpdate } from "../services/diagramUpdateHandler";
-import { handleVoiceAudio, handleVoiceTranscript } from "../services/voiceHandler";
+import { handleVoiceAudio, handleVoiceTranscript, handleVoiceTranscriptCheck } from "../services/voiceHandler";
 import type { ClientMessage, DiagramGraph } from "@archmock/shared";
 
 type SendFn = (msg: object) => void;
@@ -96,6 +96,9 @@ export function createWSHandlers(
             break;
           case "voice.transcript":
             await handleVoiceTranscript(sid, msg.content, sendToClient);
+            break;
+          case "voice.transcript_check":
+            await handleVoiceTranscriptCheck(sid, msg.content, sendToClient);
             break;
           case "diagram.update":
             handleDiagramUpdate(

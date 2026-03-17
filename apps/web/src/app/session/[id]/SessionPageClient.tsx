@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { SessionTimer } from "@/components/session/SessionTimer";
 import { SessionLayout } from "@/components/session/SessionLayout";
@@ -33,7 +34,26 @@ export function SessionPageClient({
   diagramDocument: unknown;
   notesDocument: string;
 }) {
+  const router = useRouter();
   const { getToken } = useAuth();
+  const [isRestarting, setIsRestarting] = useState(false);
+
+  const handleRestart = useCallback(async () => {
+    if (isRestarting) return;
+    if (!confirm("Restart this session? All messages, diagram, and notes will be cleared.")) return;
+    setIsRestarting(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/restart`, { method: "POST" });
+      if (!res.ok) throw new Error("Restart failed");
+      router.refresh();
+    } catch (err) {
+      console.error("Restart failed:", err);
+      alert("Failed to restart session");
+    } finally {
+      setIsRestarting(false);
+    }
+  }, [sessionId, isRestarting, router]);
+
   const getFreshToken = useCallback(
     () => getToken({ skipCache: true }),
     [getToken]
@@ -70,6 +90,15 @@ export function SessionPageClient({
           </h1>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={handleRestart}
+            disabled={isRestarting}
+            className="text-sm px-3 py-1.5 rounded border border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Restart session (clear messages, diagram, notes)"
+          >
+            {isRestarting ? "Restarting…" : "Restart Session"}
+          </button>
           <SessionTimer
             timeLimitMinutes={problem?.timeLimit ?? 45}
             startedAt={startedAt}
@@ -81,6 +110,7 @@ export function SessionPageClient({
 
       <SessionWebSocketProvider sessionId={sessionId} getToken={getFreshToken}>
         <SessionLayout
+          key={startedAt}
           sessionId={sessionId}
           problem={problem}
           currentPhase={currentPhase}

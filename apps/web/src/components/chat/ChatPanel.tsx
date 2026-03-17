@@ -37,6 +37,7 @@ export function ChatPanel({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const streamingIdRef = useRef<string | null>(null);
+  const transcriptBufferRef = useRef("");
 
   const { status, send, registerHandler } = useSessionWebSocketContext();
 
@@ -56,15 +57,31 @@ export function ChatPanel({
 
   const handleScribeTranscript = useCallback(
     (text: string) => {
-      if (status === "connected") {
-        send({ type: "voice.transcript", content: text });
+      const t0 = performance.now();
+      if (status !== "connected") {
+        console.debug("[Voice] Scribe commit ignored: not connected");
+        return;
       }
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      transcriptBufferRef.current =
+        (transcriptBufferRef.current ? transcriptBufferRef.current + " " : "") + trimmed;
+      console.debug(
+        `[Voice] Scribe commit +${(performance.now() - t0).toFixed(0)}ms: chunk="${trimmed.slice(0, 50)}${trimmed.length > 50 ? "..." : ""}", buffer="${transcriptBufferRef.current.slice(0, 80)}${transcriptBufferRef.current.length > 80 ? "..." : ""}"`
+      );
+      send({ type: "voice.transcript_check", content: transcriptBufferRef.current });
     },
     [send, status]
   );
 
-  const { isConnected, isTranscribing, connect, disconnect, tokenError } =
+  const { isConnected, isTranscribing, connect, disconnect, prefetchToken, tokenError } =
     useVoiceScribe(handleScribeTranscript);
+
+  useEffect(() => {
+    if (voiceMode === "voice" && status === "connected") {
+      prefetchToken();
+    }
+  }, [voiceMode, status, prefetchToken]);
 
   const handleServerMessage = useCallback((msg: ServerMessage) => {
     switch (msg.type) {
@@ -91,18 +108,31 @@ export function ChatPanel({
         ]);
         break;
       case "voice.chat_info":
+        console.debug(`[Voice] Received voice.chat_info: "${msg.summary}"`);
         setChatSummaries((prev) => [...prev, msg.summary]);
         break;
       case "voice.audio_start":
+        console.debug("[Voice] Received voice.audio_start, clearing buffer");
+        transcriptBufferRef.current = "";
         setIsPlayingAudio(true);
+        break;
+      case "voice.transcript_not_ready":
+        console.debug("[Voice] Received voice.transcript_not_ready, keeping buffer");
+        break;
+      case "voice.debug":
+        console.debug(
+          `[Voice] Server: ${msg.step}${msg.elapsedMs != null ? ` +${msg.elapsedMs}ms` : ""}${msg.detail ? ` | ${msg.detail}` : ""}`
+        );
         break;
       case "voice.audio_chunk":
         playChunk(msg.chunk);
         break;
       case "voice.audio_done":
+        console.debug("[Voice] Received voice.audio_done");
         playAll();
         break;
       case "error":
+        console.debug(`[Voice] Error: ${msg.code} - ${msg.message}`);
         streamingIdRef.current = null;
         setStreamingContent("");
         break;

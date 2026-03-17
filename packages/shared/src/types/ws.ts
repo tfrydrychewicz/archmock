@@ -6,6 +6,7 @@ export type ClientMessage =
   | { type: "diagram.update"; graph: DiagramGraph }
   | { type: "voice.audio"; audioBase64: string }
   | { type: "voice.transcript"; content: string }
+  | { type: "voice.transcript_check"; content: string }
   | { type: "session.end" }
   | { type: "session.request_evaluation" }
   | { type: "ping" };
@@ -19,6 +20,8 @@ export type ServerMessage =
   | { type: "voice.audio_start"; messageId: string }
   | { type: "voice.audio_chunk"; chunk: string }
   | { type: "voice.audio_done"; messageId: string; content: string }
+  | { type: "voice.transcript_not_ready" }
+  | { type: "voice.debug"; step: string; elapsedMs?: number; detail?: string }
   | { type: "session.phase_change"; phase: Phase; message: string }
   | { type: "session.evaluation_ready"; evaluationId: string }
   | { type: "session.evaluation_progress"; step: string }

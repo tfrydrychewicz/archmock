@@ -46,7 +46,7 @@ export async function* textToSpeechStream(
   if (!apiKey) throw new Error("ELEVENLABS_API_KEY not set");
 
   const res = await fetch(
-    `${ELEVENLABS_API}/text-to-speech/${voiceId}/stream?output_format=mp3_44100_128&optimize_streaming_latency=2`,
+    `${ELEVENLABS_API}/text-to-speech/${voiceId}/stream?output_format=mp3_44100_128&optimize_streaming_latency=4`,
     {
       method: "POST",
       headers: {
@@ -55,7 +55,7 @@ export async function* textToSpeechStream(
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_multilingual_v2",
+        model_id: "eleven_flash_v2_5",
       }),
     }
   );

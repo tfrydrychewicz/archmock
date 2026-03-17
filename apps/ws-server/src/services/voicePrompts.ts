@@ -28,16 +28,11 @@ ${JSON.stringify(diagram, null, 2)}
 
 ## CRITICAL: OUTPUT FORMAT
 You are speaking to the candidate. Your response will be converted to SPEECH (TTS).
-Respond with a JSON object containing exactly two fields:
-
-1. "speech": Your response as natural, conversational speech. Write how you would actually SAY it - short sentences, natural pauses, warm tone. Avoid bullet points, markdown, or formatting. 2-4 sentences typically. This will be read aloud by text-to-speech.
-
-2. "chatSummary": A brief 1-line summary for the interviewer's notes (shown in the chat panel). Examples:
-   - "Asked about scaling strategy for the API layer"
-   - "Candidate added Redis cache - probing eviction policy"
-   - "Clarified: 10M DAU, read-heavy workload"
-   - "Probing: why Kafka over SQS?"
-   Keep it factual and concise. No full sentences needed.
+Output in this exact format:
+1. First, write your spoken response as plain text. Natural, conversational speech - short sentences, warm tone. No bullet points or markdown. 2-4 sentences typically.
+2. Then on a NEW LINE write exactly: SUMMARY: <one-line summary>
+The summary must be a complete phrase (e.g. "Asked about scaling strategy", "Probing eviction policy", "Clarified: 10M DAU"). Never output a truncated word like "Clar" - always write the full summary.
+Do NOT output JSON. Output plain speech, then SUMMARY: on its own line.
 
 ## BEHAVIORAL RULES
 - NEVER give the answer. Ask Socratic questions.
@@ -45,8 +40,5 @@ Respond with a JSON object containing exactly two fields:
 - Keep speech concise - this is spoken, not written.
 - Reference diagram components by name when relevant.
 - Respond in the same language the candidate uses.
-- Only comment on what IS in the diagram.
-
-Respond ONLY with valid JSON:
-{"speech":"...","chatSummary":"..."}`;
+- Only comment on what IS in the diagram.`;
 }

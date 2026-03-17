@@ -4,7 +4,7 @@ import { sessions, messages, problems } from "@archmock/db";
 import type { SDProblem, DiagramGraph } from "@archmock/shared";
 import { buildVoiceInterviewerSystemPrompt } from "./voicePrompts";
 import { detectPhaseFromTime } from "./phase";
-import { getVoiceInterviewerResponse } from "./aiProvider";
+import { streamVoiceInterviewerResponse, isTranscriptReadyForResponse } from "./aiProvider";
 import {
   speechToText,
   textToSpeechStream,
@@ -145,14 +145,82 @@ export async function handleVoiceTranscript(
     return;
   }
 
-  await processVoiceTranscript(sessionId, transcript, sendToClient);
+  await processVoiceTranscript(sessionId, transcript, sendToClient, undefined);
+}
+
+export async function handleVoiceTranscriptCheck(
+  sessionId: string,
+  content: string,
+  sendToClient: SendFn
+): Promise<void> {
+  const t0 = Date.now();
+  const debug = (step: string, detail?: string) => {
+    sendToClient({
+      type: "voice.debug",
+      step,
+      elapsedMs: Date.now() - t0,
+      detail,
+    });
+  };
+
+  debug("transcript_check_received", `content="${content.slice(0, 80)}${content.length > 80 ? "..." : ""}"`);
+
+  if (!isVoiceEnabled()) {
+    debug("voice_disabled");
+    sendToClient({
+      type: "error",
+      code: "VOICE_DISABLED",
+      message: "Voice mode requires ELEVENLABS_API_KEY",
+    });
+    return;
+  }
+
+  const [session] = await db
+    .select()
+    .from(sessions)
+    .where(eq(sessions.id, sessionId))
+    .limit(1);
+
+  if (!session) {
+    debug("session_not_found");
+    sendToClient({
+      type: "error",
+      code: "SESSION_NOT_FOUND",
+      message: "Session not found",
+    });
+    return;
+  }
+
+  if (!content.trim()) {
+    debug("empty_content", "sending not_ready");
+    sendToClient({ type: "voice.transcript_not_ready" });
+    return;
+  }
+
+  debug("readiness_check_start");
+  const ready = await isTranscriptReadyForResponse(content);
+  debug("readiness_check_done", `ready=${ready}`);
+
+  if (ready) {
+    debug("processing_transcript_start");
+    await processVoiceTranscript(sessionId, content.trim(), sendToClient, debug);
+    debug("processing_transcript_done");
+  } else {
+    debug("not_ready", "sending transcript_not_ready");
+    sendToClient({ type: "voice.transcript_not_ready" });
+  }
 }
 
 async function processVoiceTranscript(
   sessionId: string,
   transcript: string,
-  sendToClient: SendFn
+  sendToClient: SendFn,
+  debug?: (step: string, detail?: string) => void
 ): Promise<void> {
+  const t0 = Date.now();
+  const dbg = (step: string, d?: string) =>
+    debug?.(step, d ? `${d} (process+${Date.now() - t0}ms)` : `process+${Date.now() - t0}ms`);
+
   const [session] = await db
     .select()
     .from(sessions)
@@ -218,31 +286,49 @@ async function processVoiceTranscript(
   ];
 
   const messageId = crypto.randomUUID();
+  let fullSpeech = "";
+  let audioStarted = false;
+
+  dbg("db_ready", "calling AI stream");
 
   try {
-    const { speech, chatSummary } = await getVoiceInterviewerResponse(
-      systemPrompt,
-      apiMessages
-    );
-
-    await db.insert(messages).values({
-      sessionId,
-      role: "assistant",
-      content: speech,
-      source: "chat",
+    await streamVoiceInterviewerResponse(systemPrompt, apiMessages, {
+      onSpeechChunk: async (chunk) => {
+        if (!chunk.trim()) return;
+        dbg("ai_first_chunk", `"${chunk.slice(0, 40)}..."`);
+        fullSpeech += (fullSpeech ? " " : "") + chunk;
+        if (!audioStarted) {
+          sendToClient({ type: "voice.audio_start", messageId });
+          audioStarted = true;
+        }
+        for await (const buf of textToSpeechStream(chunk)) {
+          sendToClient({
+            type: "voice.audio_chunk",
+            chunk: buf.toString("base64"),
+          });
+        }
+      },
+      onSummary: (chatSummary) => {
+        sendToClient({ type: "voice.chat_info", summary: chatSummary });
+        if (fullSpeech) {
+          db.insert(messages)
+            .values({
+              sessionId,
+              role: "assistant",
+              content: fullSpeech,
+              source: "chat",
+            })
+            .then(() => {})
+            .catch((e) => console.error("Voice message insert:", e));
+        }
+        sendToClient({ type: "voice.audio_done", messageId, content: chatSummary });
+      },
     });
 
-    sendToClient({ type: "voice.chat_info", summary: chatSummary });
-    sendToClient({ type: "voice.audio_start", messageId });
-
-    for await (const chunk of textToSpeechStream(speech)) {
-      sendToClient({
-        type: "voice.audio_chunk",
-        chunk: chunk.toString("base64"),
-      });
+    if (!audioStarted) {
+      sendToClient({ type: "voice.chat_info", summary: "" });
+      sendToClient({ type: "voice.audio_done", messageId, content: "" });
     }
-
-    sendToClient({ type: "voice.audio_done", messageId, content: chatSummary });
   } catch (err) {
     console.error("Voice handler error:", err);
     sendToClient({
